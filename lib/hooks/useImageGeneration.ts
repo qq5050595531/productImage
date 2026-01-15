@@ -81,9 +81,8 @@ export const useImageGeneration = () => {
             } else if (response.status === 500) {
               errorMessage = errorData?.error || '服务器内部错误，请稍后重试';
               console.error('Server error details:', errorData);
-              alert(errorMessage);
             }
-
+            alert(errorMessage);
             throw new Error(errorMessage);
           }
 
