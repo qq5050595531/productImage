@@ -24,12 +24,24 @@ export const useApiKey = () => {
 
   // 监听 storage 事件（其他标签页修改时同步）
   useEffect(() => {
-    const handleStorageChange = () => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'gemini_api_key') {
+        checkApiKey();
+      }
+    };
+
+    // 监听自定义事件（当前页面修改时）
+    const handleApiKeyChange = () => {
       checkApiKey();
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('api-key-changed', handleApiKeyChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('api-key-changed', handleApiKeyChange);
+    };
   }, []);
 
   return {

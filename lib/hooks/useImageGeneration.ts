@@ -91,6 +91,7 @@ export const useImageGeneration = () => {
           error instanceof Error ? error.message : '未知错误';
         setError(errorMessage);
         setGenerating(false);
+        setProgress(0, '');
         throw error;
       }
     },

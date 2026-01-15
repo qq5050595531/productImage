@@ -38,6 +38,9 @@ export const ApiKeyInput: React.FC = () => {
     setIsSaved(true);
     setError('');
 
+    // 触发自定义事件，通知其他组件 API Key 已更新
+    window.dispatchEvent(new Event('api-key-changed'));
+
     // 3秒后隐藏成功提示
     setTimeout(() => {
       setIsSaved(false);
@@ -49,6 +52,9 @@ export const ApiKeyInput: React.FC = () => {
     setApiKey('');
     setIsSaved(false);
     setError('');
+
+    // 触发自定义事件，通知其他组件 API Key 已清除
+    window.dispatchEvent(new Event('api-key-changed'));
   };
 
   return (
@@ -80,16 +86,21 @@ export const ApiKeyInput: React.FC = () => {
               setIsSaved(false);
             }}
             placeholder="请输入 Gemini API Key (以 AIza 开头)"
-            className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 pr-24 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all"
+            className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 pr-24 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all font-mono text-sm"
           />
 
-          {/* Toggle Visibility */}
+          {/* Toggle Visibility Button */}
           <button
             type="button"
             onClick={() => setIsVisible(!isVisible)}
-            className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+            className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-2 rounded hover:bg-gray-800"
+            title={isVisible ? '隐藏 API Key' : '显示 API Key'}
           >
-            {isVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {isVisible ? (
+              <EyeOff className="w-5 h-5" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
           </button>
         </div>
 

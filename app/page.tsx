@@ -28,7 +28,7 @@ export default function Home() {
     clearAllImages,
   } = useImageStore();
 
-  const { generatedImages, clearGeneratedImages } = useGenerationStore();
+  const { generatedImages, clearGeneratedImages, error: generationError } = useGenerationStore();
 
   const { generateImages, isGenerating, currentProgress, progressStage } =
     useImageGeneration();
@@ -64,6 +64,10 @@ export default function Home() {
     clearAllImages();
   };
 
+  const handleDismissError = () => {
+    useGenerationStore.getState().setError(null);
+  };
+
   return (
     <main className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -80,6 +84,45 @@ export default function Home() {
             使用 AI 技术生成创意产品图，支持产品图、模特图和参考图
           </p>
         </motion.div>
+
+        {/* Error Display */}
+        {generationError && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-8 bg-red-500/10 border-2 border-red-500 rounded-lg p-6 relative"
+          >
+            <button
+              onClick={handleDismissError}
+              className="absolute top-4 right-4 text-red-400 hover:text-red-300 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-red-400 font-semibold text-lg mb-2">生成失败</h3>
+                <p className="text-red-300">{generationError}</p>
+                <div className="mt-4 p-4 bg-red-500/10 rounded-lg">
+                  <p className="text-red-200 text-sm mb-2">可能的解决方案：</p>
+                  <ul className="text-red-300 text-sm space-y-1 list-disc list-inside">
+                    <li>检查 API Key 是否正确配置</li>
+                    <li>确认网络连接正常</li>
+                    <li>检查 API Key 额度是否充足</li>
+                    <li>尝试刷新页面后重新生成</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* API Key Input */}
         <ApiKeyInput />
@@ -138,17 +181,6 @@ export default function Home() {
           onClear={handleClear}
           isRegenerating={isGenerating}
         />
-
-        {/* Error Display */}
-        {useGenerationStore.getState().error && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-red-500/10 border border-red-500 rounded-lg p-4 text-center"
-          >
-            <p className="text-red-400">{useGenerationStore.getState().error}</p>
-          </motion.div>
-        )}
       </div>
     </main>
   );
