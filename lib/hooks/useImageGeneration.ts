@@ -50,19 +50,50 @@ export const useImageGeneration = () => {
 
         // 调用API
         setProgress(40, 'AI生成中...');
-        const response = await fetch('/api/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            productImages: productBase64,
-            modelImages: modelBase64,
-            referenceImages: referenceBase64,
-            prompt: options?.prompt,
-            count: options?.count || 4,
-          }),
-        });
+
+        let response;
+        try {
+          response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              productImages: productBase64,
+              modelImages: modelBase64,
+              referenceImages: referenceBase64,
+              prompt: options?.prompt,
+              count: options?.count || 4,
+            }),
+          });
+
+          // 检查响应状态
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+
+            // 根据状态码提供更具体的错误信息
+            let errorMessage = errorData?.error || `生成失败 (HTTP ${response.status})`;
+
+            if (response.status === 401) {
+              errorMessage = 'API Key 未配置或已失效，请检查 API Key 设置';
+            } else if (response.status === 413) {
+              errorMessage = '请求数据过大，请使用更小或更少的图片';
+            } else if (response.status === 500) {
+              errorMessage = errorData?.error || '服务器内部错误，请稍后重试';
+              console.error('Server error details:', errorData);
+              alert(errorMessage);
+            }
+
+            throw new Error(errorMessage);
+          }
+
+        } catch (networkError) {
+          // 网络错误处理
+          if (networkError instanceof TypeError && networkError.message.includes('fetch')) {
+            throw new Error('无法连接到服务器，请检查网络连接');
+          }
+          throw networkError;
+        }
 
         if (!response.ok) {
           const error = await response.json();
