@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageModel, buildGenerationPrompt, convertBase64ToGeminiFormat } from '@/lib/gemini';
 
+// Vercel Serverless Functions 最大执行时间（秒）
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -17,6 +20,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: '至少需要一张产品图片' },
         { status: 400 }
+      );
+    }
+
+    // 限制生成数量
+    if (count > 4) {
+      return NextResponse.json(
+        { success: false, error: '一次最多生成 4 张图片' },
+        { status: 400 }
+      );
+    }
+
+    // 检查请求体大小（Vercel 限制 4.5MB）
+    const bodySize = JSON.stringify(body).length;
+    if (bodySize > 4 * 1024 * 1024) { // 4MB
+      return NextResponse.json(
+        { success: false, error: '请求数据过大，请减少图片数量或降低图片质量' },
+        { status: 413 }
       );
     }
 
