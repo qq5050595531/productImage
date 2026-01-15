@@ -4,13 +4,16 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ImageUpload } from '../components/upload/ImageUpload';
 import { GenerationProgress, GeneratedGallery, PromptInput } from '../components/generation';
+import { ApiKeyInput } from '../components/ui/ApiKeyInput';
 import { useImageStore } from '../lib/store/useImageStore';
 import { useGenerationStore } from '../lib/store/useGenerationStore';
 import { useImageGeneration } from '../lib/hooks/useImageGeneration';
 import { useDownload } from '../lib/hooks/useDownload';
+import { useApiKey } from '../lib/hooks/useApiKey';
 
 export default function Home() {
   const [customPrompt, setCustomPrompt] = useState('');
+  const { isConfigured } = useApiKey();
 
   const {
     productImages,
@@ -33,8 +36,13 @@ export default function Home() {
   const { downloadSingleImage, downloadAllImages } = useDownload();
 
   const hasImages = productImages.length > 0;
+  const canGenerate = hasImages && isConfigured;
 
   const handleGenerate = () => {
+    if (!isConfigured) {
+      alert('请先配置 Gemini API Key');
+      return;
+    }
     generateImages({ count: 4, prompt: customPrompt || undefined });
   };
 
@@ -72,6 +80,9 @@ export default function Home() {
             使用 AI 技术生成创意产品图，支持产品图、模特图和参考图
           </p>
         </motion.div>
+
+        {/* API Key Input */}
+        <ApiKeyInput />
 
         {/* Upload Section */}
         <motion.div
@@ -111,7 +122,7 @@ export default function Home() {
           value={customPrompt}
           onChange={setCustomPrompt}
           onGenerate={handleGenerate}
-          disabled={!hasImages || isGenerating}
+          disabled={!canGenerate || isGenerating}
           isLoading={isGenerating}
         />
 

@@ -6,6 +6,7 @@
 
 - 📷 **多类型图片上传**: 支持产品图、模特图和参考图上传
 - 🤖 **AI 生成**: 使用 Gemini 2.5 Flash Image 模型生成高质量产品图
+- ✍️ **自定义Prompt**: 灵活的文本描述和预设模板
 - 🎨 **创意视觉效果**: 精美的渐变色彩和动画效果
 - 📥 **批量下载**: 支持单张或批量下载生成的图片
 - 🔄 **重新生成**: 一键重新生成，无需重新上传
@@ -28,21 +29,9 @@
 npm install
 ```
 
-### 2. 配置环境变量
+### 2. 获取 Gemini API Key
 
-复制 `.env.local.example` 到 `.env.local` 并配置你的 Gemini API Key:
-
-```bash
-cp .env.local.example .env.local
-```
-
-编辑 `.env.local`:
-
-```env
-NEXT_PUBLIC_GEMINI_API_KEY=your_actual_api_key_here
-```
-
-获取 API Key: https://makersuite.google.com/app/apikey
+访问 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取免费的 API Key
 
 ### 3. 运行开发服务器
 
@@ -50,9 +39,13 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_actual_api_key_here
 npm run dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000) 查看应用。
+### 4. 配置 API Key
 
-### 4. 构建生产版本
+打开 [http://localhost:3000](http://localhost:3000)，在页面顶部的输入框中粘贴你的 Gemini API Key
+
+**注意**：API Key 仅保存在浏览器本地，不会上传到服务器，完全安全！
+
+### 5. 构建生产版本（可选）
 
 ```bash
 npm run build
@@ -61,11 +54,12 @@ npm start
 
 ## 使用说明
 
-1. **上传产品图**: 至少上传一张产品图片（必填）
-2. **上传模特图**: 可选，上传模特或场景图片
-3. **上传参考图**: 可选，上传风格参考图片
-4. **生成图片**: 点击"生成产品图"按钮
-5. **下载结果**: 单张下载或批量下载生成的图片
+1. **配置 API Key**: 在首页输入框中粘贴你的 Gemini API Key
+2. **上传产品图**: 至少上传一张产品图片（必填）
+3. **上传模特图**: 可选，上传模特或场景图片
+4. **上传参考图**: 可选，上传风格参考图片
+5. **生成图片**: 点击"生成产品图"按钮
+6. **下载结果**: 单张下载或批量下载生成的图片
 
 ## 项目结构
 
@@ -89,17 +83,9 @@ nanobanana/
 └── public/                   # 静态资源
 ```
 
-## 环境变量
-
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `NEXT_PUBLIC_GEMINI_API_KEY` | Gemini API 密钥 | 必填 |
-| `NEXT_PUBLIC_MAX_FILE_SIZE` | 单张图片最大大小（字节） | 10485760 (10MB) |
-| `NEXT_PUBLIC_DEFAULT_GENERATION_COUNT` | 默认生成图片数量 | 4 |
-
 ## 注意事项
 
-1. **API Key 安全**: 请勿将 `.env.local` 提交到 Git
+1. **API Key 配置**: 直接在界面上配置 API Key，保存在浏览器本地
 2. **图片大小**: 单张图片最大 10MB
 3. **图片格式**: 支持 JPEG、PNG、WebP 格式
 4. **临时存储**: 生成的图片不持久化存储，刷新页面后丢失

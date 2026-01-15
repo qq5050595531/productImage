@@ -1,66 +1,61 @@
 # 快速启动指南
 
-## 项目状态
+## 🚀 项目状态
 
 ✅ 项目已成功构建
 ✅ 开发服务器运行中: http://localhost:3000
 
-## 下一步
+## 📝 使用步骤
 
-### 1. 配置 Gemini API Key
+### 1. 获取 Gemini API Key
 
-创建 `.env.local` 文件并添加你的 API Key:
+1. 访问 [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. 登录你的 Google 账号
+3. 点击 "Create API Key" 创建新的密钥
+4. 复制生成的 API Key
 
-```bash
-cp .env.local.example .env.local
-```
+### 2. 配置 API Key
 
-编辑 `.env.local` 并填入你的 API Key:
-```env
-NEXT_PUBLIC_GEMINI_API_KEY=你的实际API密钥
-```
+在应用首页的 "Gemini API Key" 输入框中：
+- 粘贴你的 API Key（以 `AIza` 开头）
+- 点击 "保存 API Key"
+- 看到"已保存"提示即配置成功
 
-获取 API Key: https://makersuite.google.com/app/apikey
-
-### 2. 重启开发服务器
-
-```bash
-# 停止当前服务器 (Ctrl+C)
-# 重新启动
-npm run dev
-```
+**注意**：
+- API Key 仅保存在浏览器本地存储（localStorage）
+- 不会上传到任何服务器
+- 关闭浏览器后仍然保留
+- 清除浏览器数据会丢失
 
 ### 3. 开始使用
 
-1. 打开浏览器访问 http://localhost:3000
-2. 上传产品图（必填）
-3. 可选上传模特图和参考图
-4. 点击"生成产品图"按钮
-5. 等待 AI 生成完成
-6. 下载生成的图片
+1. **上传产品图**（必填）
+   - 点击或拖拽上传产品图片
+   - 支持 JPEG、PNG、WebP 格式
+   - 单张图片最大 10MB
 
-## 项目结构总览
+2. **上传模特图**（可选）
+   - 上传模特或场景图片
+   - AI 会将产品与模特图融合
 
-```
-nanobanana/
-├── app/                      # Next.js App Router
-│   ├── api/generate/route.ts # 图片生成 API
-│   ├── page.tsx              # 主页面
-│   └── layout.tsx            # 根布局
-├── components/               # React 组件
-│   ├── generation/           # 生成组件
-│   ├── upload/               # 上传组件
-│   └── ui/                   # UI 基础组件
-├── lib/                      # 工具库
-│   ├── gemini/               # Gemini API 集成
-│   ├── hooks/                # 自定义 Hooks
-│   ├── store/                # Zustand 状态管理
-│   ├── types/                # TypeScript 类型
-│   └── utils/                # 工具函数
-└── .env.local.example        # 环境变量模板
-```
+3. **上传参考图**（可选）
+   - 上传风格参考图片
+   - AI 会参考图片风格生成
 
-## 可用命令
+4. **输入生成描述**（可选）
+   - 在文本框中输入你的需求
+   - 或使用预设模板快速填写
+
+5. **生成产品图**
+   - 点击"生成产品图"按钮
+   - 等待 AI 生成（约 10-30 秒）
+   - 查看生成结果
+
+6. **下载图片**
+   - 单张下载：点击图片上的下载按钮
+   - 批量下载：点击"下载全部"打包为 ZIP
+
+## 🔧 可用命令
 
 ```bash
 npm run dev      # 启动开发服务器
@@ -69,20 +64,64 @@ npm run start    # 启动生产服务器
 npm run lint     # 运行代码检查
 ```
 
-## 功能特性
+## 💡 使用技巧
 
-- ✅ 多类型图片上传（产品图、模特图、参考图）
+### 优化生成效果
+
+1. **使用多图参考**
+   - 产品图 + 模特图：获得真实场景效果
+   - 产品图 + 参考图：获得特定风格
+   - 三种图都用：获得最佳效果
+
+2. **编写好的 Prompt**
+   - 描述清晰具体
+   - 包含风格要求
+   - 说明场景和氛围
+
+3. **使用预设模板**
+   - 点击"显示预设模板"
+   - 选择合适的风格
+   - 在此基础上修改
+
+### 常见问题
+
+**Q: API Key 在哪里配置？**
+A: 直接在应用首页的输入框中配置，无需修改代码或环境变量
+
+**Q: API Key 安全吗？**
+A: 完全安全，API Key 只保存在你的浏览器本地，不会上传
+
+**Q: 生成失败怎么办？**
+A: 检查 API Key 是否正确，或者等待片刻后重试
+
+**Q: 可以生成多少张图片？**
+A: 一次最多生成 4 张，可以重新生成
+
+**Q: 支持哪些图片格式？**
+A: JPEG、PNG、WebP，单张最大 10MB
+
+## 🎯 功能特性
+
+- ✅ 三种图片上传（产品图、模特图、参考图）
 - ✅ 拖拽上传支持
-- ✅ 图片预览和验证
-- ✅ AI 生成产品图
-- ✅ 实时进度显示
+- ✅ 图片预览和删除
+- ✅ 界面配置 API Key
+- ✅ 自定义 Prompt 输入
+- ✅ 5 种预设 Prompt 模板
+- ✅ 实时生成进度显示
 - ✅ 单张/批量下载
 - ✅ 重新生成功能
 - ✅ 创意动画效果
 
-## 注意事项
+## 📚 更多文档
 
-1. **API Key**: 必须配置 Gemini API Key 才能使用生成功能
-2. **图片限制**: 单张图片最大 10MB，支持 JPEG、PNG、WebP 格式
-3. **临时存储**: 生成的图片不持久化，刷新页面后需要重新生成
-4. **浏览器兼容**: 建议使用最新版本的 Chrome、Firefox 或 Safari
+- [README.md](README.md) - 项目说明
+- [DEPLOYMENT.md](DEPLOYMENT.md) - 部署指南
+- [QUICK_DEPLOY.md](QUICK_DEPLOY.md) - Vercel 快速部署
+
+## 🆘 需要帮助？
+
+- Gemini API 文档: https://ai.google.dev/docs
+- 项目 Issues: 在 GitHub 提交问题
+
+祝使用愉快！🎉

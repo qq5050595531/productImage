@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       productImages,
       modelImages = [],
       referenceImages = [],
-      prompt,
+      prompt: customPrompt,
       count = 4,
     } = body;
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       true,
       modelImages.length > 0,
       referenceImages.length > 0,
-      prompt
+      customPrompt
     );
 
     // 准备图片数据
