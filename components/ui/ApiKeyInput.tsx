@@ -2,24 +2,32 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { Key, Eye, EyeOff, Check, AlertCircle, ChevronDown, ChevronUp, Settings } from 'lucide-react';
 import { Card } from './Card';
 import { Button } from './Button';
 
-const STORAGE_KEY = 'gemini_api_key';
+const STORAGE_KEY_API = 'gemini_api_key';
+const STORAGE_KEY_BASE_URL = 'gemini_base_url';
 
 export const ApiKeyInput: React.FC = () => {
   const [apiKey, setApiKey] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [error, setError] = useState('');
+  const [baseUrl, setBaseUrl] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 从 localStorage 加载保存的 API Key
+  // 从 localStorage 加载保存的 API Key 和 Base URL
   useEffect(() => {
-    const savedKey = localStorage.getItem(STORAGE_KEY);
+    const savedKey = localStorage.getItem(STORAGE_KEY_API);
     if (savedKey) {
       setApiKey(savedKey);
       setIsSaved(true);
+    }
+
+    const savedBaseUrl = localStorage.getItem(STORAGE_KEY_BASE_URL);
+    if (savedBaseUrl) {
+      setBaseUrl(savedBaseUrl);
     }
   }, []);
 
@@ -29,12 +37,20 @@ export const ApiKeyInput: React.FC = () => {
       return;
     }
 
-    if (!apiKey.startsWith('AIza')) {
-      setError('API Key 格式不正确，应该以 "AIza" 开头');
-      return;
+    // if (!apiKey.startsWith('AIza')) {
+    //   setError('API Key 格式不正确，应该以 "AIza" 开头');
+    //   return;
+    // }
+
+    localStorage.setItem(STORAGE_KEY_API, apiKey.trim());
+
+    // 保存 Base URL（如果有）
+    if (baseUrl.trim()) {
+      localStorage.setItem(STORAGE_KEY_BASE_URL, baseUrl.trim());
+    } else {
+      localStorage.removeItem(STORAGE_KEY_BASE_URL);
     }
 
-    localStorage.setItem(STORAGE_KEY, apiKey.trim());
     setIsSaved(true);
     setError('');
 
@@ -48,8 +64,10 @@ export const ApiKeyInput: React.FC = () => {
   };
 
   const handleClear = () => {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_KEY_API);
+    localStorage.removeItem(STORAGE_KEY_BASE_URL);
     setApiKey('');
+    setBaseUrl('');
     setIsSaved(false);
     setError('');
 
@@ -139,6 +157,52 @@ export const ApiKeyInput: React.FC = () => {
             </Button>
           )}
         </div>
+
+        {/* Advanced Settings Toggle */}
+        <button
+          type="button"
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="w-full flex items-center justify-center gap-2 text-gray-400 hover:text-purple-400 transition-colors py-2 text-sm"
+        >
+          <Settings className="w-4 h-4" />
+          <span>高级设置</span>
+          {showAdvanced ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
+          )}
+        </button>
+
+        {/* Advanced Settings Panel */}
+        <AnimatePresence>
+          {showAdvanced && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="p-4 bg-gray-900/50 border border-gray-700 rounded-lg space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    API Base URL（可选）
+                  </label>
+                  <input
+                    type="text"
+                    value={baseUrl}
+                    onChange={(e) => setBaseUrl(e.target.value)}
+                    placeholder="例如: https://api.example.com/v1beta"
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none transition-all font-mono text-sm"
+                  />
+                  <p className="text-gray-500 text-xs mt-2">
+                    如果需要使用代理或自定义 API 端点，请在此输入。留空则使用默认的 Google API endpoint。
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Help Text */}
         <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">

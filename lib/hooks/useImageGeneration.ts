@@ -3,6 +3,7 @@
 import { useCallback } from 'react';
 import { useImageStore } from '../store/useImageStore';
 import { useGenerationStore } from '../store/useGenerationStore';
+import { getBaseUrl } from '../gemini/client';
 
 export const useImageGeneration = () => {
   const { productImages, modelImages, referenceImages } = useImageStore();
@@ -51,6 +52,9 @@ export const useImageGeneration = () => {
         // 调用API
         setProgress(40, 'AI生成中...');
 
+        // 获取 base_url（如果已配置）
+        const baseUrl = getBaseUrl();
+
         let response;
         try {
           response = await fetch('/api/generate', {
@@ -64,6 +68,7 @@ export const useImageGeneration = () => {
               referenceImages: referenceBase64,
               prompt: options?.prompt,
               count: options?.count || 4,
+              baseUrl,
             }),
           });
 

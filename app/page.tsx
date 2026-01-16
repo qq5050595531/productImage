@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Settings, X } from 'lucide-react';
 import { ImageUpload } from '../components/upload/ImageUpload';
 import { GenerationProgress, GeneratedGallery, PromptInput } from '../components/generation';
 import { ApiKeyInput } from '../components/ui/ApiKeyInput';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 import { useImageStore } from '../lib/store/useImageStore';
 import { useGenerationStore } from '../lib/store/useGenerationStore';
 import { useImageGeneration } from '../lib/hooks/useImageGeneration';
@@ -13,6 +16,7 @@ import { useApiKey } from '../lib/hooks/useApiKey';
 
 export default function Home() {
   const [customPrompt, setCustomPrompt] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
   const { isConfigured } = useApiKey();
 
   const {
@@ -75,14 +79,25 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="relative mb-12"
         >
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
-            产品图生成器
-          </h1>
-          <p className="text-gray-400 text-lg">
-            使用 AI 技术生成创意产品图，支持产品图、模特图和参考图
-          </p>
+          {/* Settings Button */}
+          <button
+            onClick={() => setShowSettings(true)}
+            className="absolute top-0 right-0 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors group"
+            title="打开设置"
+          >
+            <Settings className="w-5 h-5 text-gray-400 group-hover:text-purple-400 transition-colors" />
+          </button>
+
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
+              产品图生成器
+            </h1>
+            <p className="text-gray-400 text-lg">
+              使用 AI 技术生成创意产品图，支持产品图、模特图和参考图
+            </p>
+          </div>
         </motion.div>
 
         {/* Error Display */}
@@ -123,9 +138,6 @@ export default function Home() {
             </div>
           </motion.div>
         )}
-
-        {/* API Key Input */}
-        <ApiKeyInput />
 
         {/* Upload Section */}
         <motion.div
@@ -182,6 +194,51 @@ export default function Home() {
           isRegenerating={isGenerating}
         />
       </div>
+
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSettings(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="bg-gray-900 border border-gray-700 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <Settings className="w-5 h-5 text-purple-400" />
+                    <h2 className="text-xl font-semibold text-white">API 设置</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6">
+                  <ApiKeyInput />
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </main>
   );
 }

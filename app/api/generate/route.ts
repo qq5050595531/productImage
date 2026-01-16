@@ -1,8 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getImageModel, buildGenerationPrompt, convertBase64ToGeminiFormat } from '@/lib/gemini';
+import { buildGenerationPrompt, convertBase64ToGeminiFormat, getApiKey } from '@/lib/gemini';
 
 // Vercel Serverless Functions 最大执行时间（秒）
 export const maxDuration = 60;
+
+// 使用原生 fetch 调用 Gemini REST API
+async function callGeminiAPI(
+  apiKey: string,
+  prompt: string,
+  images: any[],
+  baseUrl?: string
+): Promise<{ success: boolean; data?: string; error?: string }> {
+  try {
+    // 构建请求体
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: prompt },
+            ...images,
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.4,
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 4096,
+      },
+    };
+
+    // 构建 URL
+    const defaultUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent';
+    let url = defaultUrl;
+
+    if (baseUrl) {
+      // 使用自定义 base_url
+      const path = '/v1beta/models/gemini-2.5-flash-image-preview:generateContent';
+      url = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) + path : baseUrl + path;
+    }
+
+    // 添加 API Key
+    const urlWithKey = `${url}?key=${apiKey}`;
+
+    console.log('[Gemini API] Calling:', urlWithKey.replace(apiKey, '***'));
+
+    const response = await fetch(urlWithKey, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Gemini API] Error:', response.status, errorText);
+      return {
+        success: false,
+        error: `API 调用失败 (${response.status}): ${errorText}`,
+      };
+    }
+
+    const data = await response.json();
+
+    // 提取生成的图片（Base64）
+    const generatedImage = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+    if (!generatedImage) {
+      return {
+        success: false,
+        error: 'API 返回数据格式错误',
+      };
+    }
+
+    return {
+      success: true,
+      data: generatedImage,
+    };
+  } catch (error) {
+    console.error('[Gemini API] Exception:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : '未知错误',
+    };
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +96,7 @@ export async function POST(request: NextRequest) {
       referenceImages = [],
       prompt: customPrompt,
       count = 4,
+      baseUrl,
     } = body;
 
     console.log('[Generate API] Request received:', {
@@ -50,13 +134,13 @@ export async function POST(request: NextRequest) {
 
     console.log('[Generate API] Input validation passed');
 
-    // 获取模型 - 捕获 API Key 相关错误
-    let model;
+    // 获取 API Key
+    let apiKey: string;
     try {
-      model = getImageModel();
-      console.log('[Generate API] Model loaded successfully');
+      apiKey = getApiKey();
+      console.log('[Generate API] API Key loaded successfully');
     } catch (error) {
-      console.error('[Generate API] Failed to load model:', error);
+      console.error('[Generate API] Failed to get API Key:', error);
       return NextResponse.json(
         {
           success: false,
@@ -86,24 +170,22 @@ export async function POST(request: NextRequest) {
     const generationPromises = Array.from({ length: count }, async (_, index) => {
       try {
         console.log(`[Generate API] Starting generation ${index + 1}/${count}`);
-        const result = await model.generateContent([
-          fullPrompt,
-          ...imageDataParts,
-        ]);
 
-        const response = await result.response;
-        const generatedImage = response.candidates?.[0]?.content?.parts?.[0];
+        const result = await callGeminiAPI(apiKey, fullPrompt, imageDataParts, baseUrl);
 
-        if (!generatedImage?.inlineData?.data) {
-          console.error(`[Generate API] Generation ${index + 1} failed: No image data in response`);
-          return null;
+        if (!result.success || !result.data) {
+          console.error(`[Generate API] Generation ${index + 1} failed:`, result.error);
+          return {
+            error: result.error || '图片生成失败',
+            index,
+          };
         }
 
         console.log(`[Generate API] Generation ${index + 1} succeeded`);
 
         return {
           id: `generated-${Date.now()}-${index}`,
-          base64: `data:image/png;base64,${generatedImage.inlineData.data}`,
+          base64: `data:image/png;base64,${result.data}`,
           timestamp: Date.now(),
         };
       } catch (error) {
